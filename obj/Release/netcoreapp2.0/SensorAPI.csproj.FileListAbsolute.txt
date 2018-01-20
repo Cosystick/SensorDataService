@@ -1,0 +1,10 @@
+C:\Projects\SensorAPI\bin\Release\netcoreapp2.0\SensorAPI.deps.json
+C:\Projects\SensorAPI\bin\Release\netcoreapp2.0\SensorAPI.runtimeconfig.json
+C:\Projects\SensorAPI\bin\Release\netcoreapp2.0\SensorAPI.runtimeconfig.dev.json
+C:\Projects\SensorAPI\bin\Release\netcoreapp2.0\SensorAPI.dll
+C:\Projects\SensorAPI\bin\Release\netcoreapp2.0\SensorAPI.pdb
+C:\Projects\SensorAPI\obj\Release\netcoreapp2.0\SensorAPI.csproj.CoreCompileInputs.cache
+C:\Projects\SensorAPI\obj\Release\netcoreapp2.0\SensorAPI.AssemblyInfoInputs.cache
+C:\Projects\SensorAPI\obj\Release\netcoreapp2.0\SensorAPI.AssemblyInfo.cs
+C:\Projects\SensorAPI\obj\Release\netcoreapp2.0\SensorAPI.dll
+C:\Projects\SensorAPI\obj\Release\netcoreapp2.0\SensorAPI.pdb
