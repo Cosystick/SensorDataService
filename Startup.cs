@@ -32,6 +32,12 @@ namespace SensorAPI
             services.AddTransient<ISendSensorDataOperation, SendSensorDataOperation>();
             services.AddTransient<IUpdateDeviceOperation, UpdateDeviceOperation>();
             services.AddMvc();
+
+            services.Configure<IISOptions>(options =>
+            {
+                options.AutomaticAuthentication = true;
+                options.AuthenticationDisplayName = null;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

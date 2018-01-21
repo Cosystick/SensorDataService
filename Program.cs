@@ -19,6 +19,8 @@ namespace SensorAPI
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
+                .UseEnvironment("Development")
                 .UseStartup<Startup>()
                 .Build();
     }
