@@ -19,12 +19,10 @@ namespace SensorAPI
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseKestrel()
-                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
+                .UseKestrel()                
+                .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .UseContentRoot(Directory.GetCurrentDirectory())                
-                .UseEnvironment("Development")
-                .UseStartup<Startup>()
+                .UseStartup<Startup>()                
                 .Build();
     }
 }
