@@ -18,11 +18,7 @@ namespace SensorService.API.Operations
                                          .ThenInclude(s => s.Data)
                                          .SingleOrDefault(d => d.Id == id);
 
-            if (device == null)
-            {
-                return new NotFoundObjectResult(id);
-            }
-            return new ObjectResult(device);
+            return device == null ? new NotFoundObjectResult(id) : new ObjectResult(device);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SensorService.API.Operations
 
         public override IActionResult OperationBody(DeviceDataDTO deviceDataDTO)
         {
-            if (deviceDataDTO == null || deviceDataDTO.SensorData == null || !deviceDataDTO.SensorData.Any())
+            if (deviceDataDTO?.SensorData == null || !deviceDataDTO.SensorData.Any())
             {
                 return new BadRequestResult();
             }
@@ -39,7 +39,7 @@ namespace SensorService.API.Operations
                 foreach (var sensor in deviceDataDTO.SensorData)
                 {
                     var dataToAdd = new SensorData(sensor.Value);
-                    if (!existingDevice.Sensors.Any(s => s.SensorKey == sensor.SensorKey))
+                    if (existingDevice.Sensors.All(s => s.SensorKey != sensor.SensorKey))
                     {
                         var sensorToAdd = new Sensor { SensorKey = sensor.SensorKey, SensorType = sensor.SensorType };
                         sensorToAdd.Data.Add(dataToAdd);
@@ -47,7 +47,7 @@ namespace SensorService.API.Operations
                     }
                     else
                     {
-                        existingDevice.Sensors.SingleOrDefault(s => s.SensorKey == sensor.SensorKey).Data.Add(dataToAdd);
+                        existingDevice.Sensors.SingleOrDefault(s => s.SensorKey == sensor.SensorKey)?.Data.Add(dataToAdd);
                     }
                 }
                 Context.Update(existingDevice);

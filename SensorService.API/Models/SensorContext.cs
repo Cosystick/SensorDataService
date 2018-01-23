@@ -4,7 +4,7 @@ namespace SensorService.API.Models
 {
     public class SensorContext : DbContext
     {
-        public SensorContext(DbContextOptions<SensorContext> options)
+        public SensorContext(DbContextOptions options)
             : base(options)
         {
         }

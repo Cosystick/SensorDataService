@@ -5,7 +5,7 @@ namespace SensorService.API.Operations
 {
     public abstract class OperationBase<T> : IOperation<T>
     {
-        public OperationBase(SensorContext context)
+        protected OperationBase(SensorContext context)
         {
             Context = context;
         }
@@ -22,7 +22,7 @@ namespace SensorService.API.Operations
 
     public abstract class OperationBase : IOperation
     {
-        public OperationBase(SensorContext context)
+        protected OperationBase(SensorContext context)
         {
             Context = context;
         }
