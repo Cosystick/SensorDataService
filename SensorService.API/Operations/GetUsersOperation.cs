@@ -10,7 +10,7 @@ namespace SensorService.API.Operations
     {
         public GetUsersOperation(SensorContext context, 
                                  IHttpContextAccessor httpContextAccessor,
-                                 INoAuthorization noAuthorization) 
+                                 IAdministratorAuthorization noAuthorization) 
                                  : base(context, httpContextAccessor, noAuthorization)
         {
         }

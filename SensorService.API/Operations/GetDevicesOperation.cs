@@ -12,7 +12,7 @@ namespace SensorService.API.Operations
 
         public GetDevicesOperation(SensorContext context,
                                    IHttpContextAccessor httpContextAccessor, 
-                                   INoAuthorization noAuthorization)
+                                   IAdministratorAuthorization noAuthorization)
                                    : base(context, httpContextAccessor, noAuthorization)
         {
         }

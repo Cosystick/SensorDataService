@@ -1,6 +1,3 @@
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.DTOs;
@@ -15,42 +12,36 @@ namespace SensorService.API.Controllers
         private readonly IGetDeviceByIdOperation _getDeviceByIdOperation;
         private readonly ISendSensorDataOperation _sendSensorDataOperation;
         private readonly IUpdateDeviceOperation _updateDeviceOperation;
+        private readonly IGetDevicesByUserOperation _getDevicesByUserOperation;
 
         public DevicesController(IGetDevicesOperation getDevicesOperation,
                                  IGetDeviceByIdOperation getDeviceByIdOperation,
                                  ISendSensorDataOperation sendSensorDataOperation,
-                                 IUpdateDeviceOperation updateDeviceOperation)
+                                 IUpdateDeviceOperation updateDeviceOperation,
+                                 IGetDevicesByUserOperation getDevicesByUserOperation)
         {
             _getDevicesOperation = getDevicesOperation;
             _getDeviceByIdOperation = getDeviceByIdOperation;
             _sendSensorDataOperation = sendSensorDataOperation;
             _updateDeviceOperation = updateDeviceOperation;
+            _getDevicesByUserOperation = getDevicesByUserOperation;
         }
 
         // GET api/values
-        
-        [HttpGet,Authorize]
-        public IActionResult Get()
-        {
-            return _getDevicesOperation.Execute();
-        }
+
+        [HttpGet, Authorize]
+        public IActionResult Get() => _getDevicesOperation.Execute();
 
         [HttpGet("{id}"), Authorize]
-        public IActionResult GetById(string id)
-        {
-            return _getDeviceByIdOperation.Execute(id);
-        }
+        public IActionResult GetById(string id) => _getDeviceByIdOperation.Execute(id);
+
+        [HttpGet("user/{id}"), Authorize]
+        public IActionResult GetByUser(int id) => _getDevicesByUserOperation.Execute(new UserIdDTO(id));
 
         [HttpPost, Authorize]
-        public IActionResult SendSensorData([FromBody] DeviceDataDTO deviceDataDTO)
-        {
-            return _sendSensorDataOperation.Execute(deviceDataDTO);
-        }
+        public IActionResult SendSensorData([FromBody] DeviceDataDTO deviceDataDTO) => _sendSensorDataOperation.Execute(deviceDataDTO);
 
         [HttpPut, Authorize]
-        public IActionResult Update([FromBody] DeviceDTO deviceDTO)
-        {
-            return _updateDeviceOperation.Execute(deviceDTO);
-        }
+        public IActionResult Update([FromBody] DeviceDTO deviceDTO) => _updateDeviceOperation.Execute(deviceDTO);
     }
 }

@@ -47,6 +47,7 @@ namespace SensorService.API
             services.AddTransient<IUpdateUserOperation, UpdateUserOperation>();
             services.AddTransient<IDeleteUserOperation, DeleteUserOperation>();
             services.AddTransient<IGetUserByIdOperation, GetUserByIdOperation>();
+            services.AddTransient<IGetDevicesByUserOperation, GetDevicesByUserOperation>();
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddMvc();
 

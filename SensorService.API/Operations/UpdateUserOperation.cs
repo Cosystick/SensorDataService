@@ -11,7 +11,7 @@ namespace SensorService.API.Operations
     {
         public UpdateUserOperation(SensorContext context, 
                                    IHttpContextAccessor httpContextAccessor, 
-                                   IAdministratorAuthorization<UserDTO> authorization) 
+                                   INoAuthorization<UserDTO> authorization) 
             : base(context, httpContextAccessor, authorization)
         {
         }
@@ -22,6 +22,11 @@ namespace SensorService.API.Operations
             if (existingUser == null)
             {
                 return new BadRequestResult();
+            }
+
+            if (existingUser.Id != CurrentUserId && !CurrentUser.IsAdministrator)
+            {
+                return new UnauthorizedResult();
             }
 
             existingUser.Email = userDTO.Email;
