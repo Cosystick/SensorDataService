@@ -1,6 +1,8 @@
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SensorService.API.Authorizations;
 using SensorService.API.DTOs;
 using SensorService.API.Models;
 
@@ -8,7 +10,10 @@ namespace SensorService.API.Operations
 {
     public class SendSensorDataOperation : OperationBase<DeviceDataDTO>, ISendSensorDataOperation
     {
-        public SendSensorDataOperation(SensorContext context) : base(context)
+        public SendSensorDataOperation(SensorContext context, 
+                                       IHttpContextAccessor httpContextAccessor,
+                                       INoAuthorization<DeviceDataDTO> noAuthorization) 
+                                       : base(context, httpContextAccessor, noAuthorization)
         {
         }
 
@@ -22,7 +27,7 @@ namespace SensorService.API.Operations
                                                  .SingleOrDefault(d => d.Id == deviceDataDTO.DeviceId);
             if (existingDevice == null)
             {
-                var createdDevice = new Device { Id = deviceDataDTO.DeviceId };
+                var createdDevice = new Device { Id = deviceDataDTO.DeviceId,UserId = CurrentUserId};
                 foreach (var sensor in deviceDataDTO.SensorData)
                 {
                     var createdSensor = new Sensor { SensorKey = sensor.SensorKey, SensorType = sensor.SensorType };
@@ -41,7 +46,8 @@ namespace SensorService.API.Operations
                     var dataToAdd = new SensorData(sensor.Value);
                     if (existingDevice.Sensors.All(s => s.SensorKey != sensor.SensorKey))
                     {
-                        var sensorToAdd = new Sensor { SensorKey = sensor.SensorKey, SensorType = sensor.SensorType };
+                        var sensorToAdd = new Sensor { SensorKey = sensor.SensorKey,
+                                                       SensorType = sensor.SensorType };
                         sensorToAdd.Data.Add(dataToAdd);
                         existingDevice.Sensors.Add(sensorToAdd);
                     }

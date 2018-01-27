@@ -1,13 +1,18 @@
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SensorService.API.Authorizations;
 using SensorService.API.Models;
 
 namespace SensorService.API.Operations
 {
     public class GetDeviceByIdOperation : OperationBase<string>, IGetDeviceByIdOperation
     {
-        public GetDeviceByIdOperation(SensorContext context) : base(context)
+        public GetDeviceByIdOperation(SensorContext context, 
+                                      IHttpContextAccessor httpContextAccessor,
+                                      INoAuthorization<string> noAuthorization) 
+                                      : base(context, httpContextAccessor, noAuthorization)
         {
         }
 

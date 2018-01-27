@@ -1,5 +1,7 @@
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SensorService.API.Authorizations;
 using SensorService.API.DTOs;
 using SensorService.API.Models;
 
@@ -7,7 +9,10 @@ namespace SensorService.API.Operations
 {
     public class UpdateDeviceOperation : OperationBase<DeviceDTO>, IUpdateDeviceOperation
     {
-        public UpdateDeviceOperation(SensorContext context) : base(context)
+        public UpdateDeviceOperation(SensorContext context, 
+                                     IHttpContextAccessor httpContextAccessor,
+                                     INoAuthorization<DeviceDTO> noAuthorization) 
+                                     : base(context, httpContextAccessor, noAuthorization)
         {
         }
 
@@ -21,6 +26,7 @@ namespace SensorService.API.Operations
             }
 
             device.Name = deviceDTO.Name;
+            device.UserId = deviceDTO.UserId;
             device.IsVisible = deviceDTO.IsVisible;
             device.Created = deviceDTO.Created;
 

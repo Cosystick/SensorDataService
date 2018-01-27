@@ -1,3 +1,7 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.DTOs;
 using SensorService.API.Operations;
@@ -24,25 +28,26 @@ namespace SensorService.API.Controllers
         }
 
         // GET api/values
-        [HttpGet]
+        
+        [HttpGet,Authorize]
         public IActionResult Get()
         {
             return _getDevicesOperation.Execute();
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}"), Authorize]
         public IActionResult GetById(string id)
         {
             return _getDeviceByIdOperation.Execute(id);
         }
 
-        [HttpPost]
+        [HttpPost, Authorize]
         public IActionResult SendSensorData([FromBody] DeviceDataDTO deviceDataDTO)
         {
             return _sendSensorDataOperation.Execute(deviceDataDTO);
         }
 
-        [HttpPut]
+        [HttpPut, Authorize]
         public IActionResult Update([FromBody] DeviceDTO deviceDTO)
         {
             return _updateDeviceOperation.Execute(deviceDTO);
