@@ -1,0 +1,23 @@
+﻿@page
+@model DevicesModel
+<div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Device</th>
+            <th scope="col">Device count</th>
+            <th scope="col">Created</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var device in Model.Devices)
+        {
+            <tr>
+                <td><a href="/DeviceInfo/?id=@device.Id">@device.Name</a></td>
+                <td>@device.Sensors.Count()</td>
+                <td>@device.Created.ToShortDateString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

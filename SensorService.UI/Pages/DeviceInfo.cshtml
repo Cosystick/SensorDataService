@@ -1,0 +1,53 @@
+﻿@page
+@using Extensions
+@using Newtonsoft.Json
+@model DeviceInfoModel
+
+<div>
+    <H1>@Model.Device.Name</H1>
+    <H3>Sensors:</H3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Key</th>
+                <th scope="col">Type</th>
+                <th scope="col">Data Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sensor in Model.Device.Sensors)
+            {
+                <tr>
+                    <td>@sensor.Id</td>
+                    <td>@sensor.SensorKey</td>
+                    <td>@sensor.SensorType</td>
+                    <td>@sensor.Data.Count()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script src="~/js/chartist.js"></script>
+    @foreach (var item in Model.SensorData)
+    {
+        <div class="col-md-4 text-center">
+            <h3>@item.Key</h3>
+            <div class="ct-chart-@item.Key ct-perfect-fourth"></div>
+        </div>
+        <script language="javascript">
+            new Chartist.Line('.ct-chart-@item.Key',
+                {
+                    series: [
+                                {
+                                    name: '@item.Key',
+                                    data: @item.Value
+                                }
+                            ]
+                },
+                {
+                    low: 0,
+                    showArea: true
+                });
+        </script>
+    }
+</div>

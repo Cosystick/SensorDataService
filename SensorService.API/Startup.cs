@@ -26,28 +26,28 @@ namespace SensorService.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SensorContext>();
-            services.AddTransient<IAdministratorAuthorization, AdministratorAuthorization>();
-            services.AddTransient<IAdministratorAuthorization<UserDTO>, AdministratorAuthorization<UserDTO>>();
-            services.AddTransient<IAdministratorAuthorization<UserIdDTO>, AdministratorAuthorization<UserIdDTO>>();
-            services.AddTransient<INoAuthorization, NoAuthorization>();
-            services.AddTransient<INoAuthorization<LoginDTO>, NoAuthorization<LoginDTO>>();
-            services.AddTransient<INoAuthorization<string>, NoAuthorization<string>>();
-            services.AddTransient<INoAuthorization<DeviceDataDTO>, NoAuthorization<DeviceDataDTO>>();
-            services.AddTransient<INoAuthorization<DeviceDTO>, NoAuthorization<DeviceDTO>>();
-            services.AddTransient<INoAuthorization<UserDTO>, NoAuthorization<UserDTO>>();
-            services.AddTransient<INoAuthorization<UserIdDTO>, NoAuthorization<UserIdDTO>>();
+            services.AddScoped<IAdministratorAuthorization, AdministratorAuthorization>();
+            services.AddScoped<IAdministratorAuthorization<UserDTO>, AdministratorAuthorization<UserDTO>>();
+            services.AddScoped<IAdministratorAuthorization<UserIdDTO>, AdministratorAuthorization<UserIdDTO>>();
+            services.AddScoped<INoAuthorization, NoAuthorization>();
+            services.AddScoped<INoAuthorization<LoginDTO>, NoAuthorization<LoginDTO>>();
+            services.AddScoped<INoAuthorization<string>, NoAuthorization<string>>();
+            services.AddScoped<INoAuthorization<DeviceDataDTO>, NoAuthorization<DeviceDataDTO>>();
+            services.AddScoped<INoAuthorization<DeviceDTO>, NoAuthorization<DeviceDTO>>();
+            services.AddScoped<INoAuthorization<UserDTO>, NoAuthorization<UserDTO>>();
+            services.AddScoped<INoAuthorization<UserIdDTO>, NoAuthorization<UserIdDTO>>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient<IGetDevicesOperation, GetDevicesOperation>();
-            services.AddTransient<IGetDeviceByIdOperation, GetDeviceByIdOperation>();
-            services.AddTransient<ISendSensorDataOperation, SendSensorDataOperation>();
-            services.AddTransient<IUpdateDeviceOperation, UpdateDeviceOperation>();
-            services.AddTransient<IGenerateTokenOperation, GenerateTokenOperation>();
-            services.AddTransient<IGetUsersOperation, GetUsersOperation>();
-            services.AddTransient<IInsertUserOperation, InsertUserOperation>();
-            services.AddTransient<IUpdateUserOperation, UpdateUserOperation>();
-            services.AddTransient<IDeleteUserOperation, DeleteUserOperation>();
-            services.AddTransient<IGetUserByIdOperation, GetUserByIdOperation>();
-            services.AddTransient<IGetDevicesByUserOperation, GetDevicesByUserOperation>();
+            services.AddScoped<IGetDevicesOperation, GetDevicesOperation>();
+            services.AddScoped<IGetDeviceByIdOperation, GetDeviceByIdOperation>();
+            services.AddScoped<ISendSensorDataOperation, SendSensorDataOperation>();
+            services.AddScoped<IUpdateDeviceOperation, UpdateDeviceOperation>();
+            services.AddScoped<IGenerateTokenOperation, GenerateTokenOperation>();
+            services.AddScoped<IGetUsersOperation, GetUsersOperation>();
+            services.AddScoped<IInsertUserOperation, InsertUserOperation>();
+            services.AddScoped<IUpdateUserOperation, UpdateUserOperation>();
+            services.AddScoped<IDeleteUserOperation, DeleteUserOperation>();
+            services.AddScoped<IGetUserByIdOperation, GetUserByIdOperation>();
+            services.AddScoped<IGetDevicesByUserOperation, GetDevicesByUserOperation>();
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddMvc();
 
@@ -92,9 +92,8 @@ namespace SensorService.API
             {
                 app.UseExceptionHandler("/Error");
             }
-
+            
             app.UseStaticFiles();
-
             app.UseAuthentication();
 
             app.UseMvc(routes =>
