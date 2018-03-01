@@ -1,82 +1,42 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
+using System.Security.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Services;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class GenerateTokenOperation : OperationBase<LoginDTO>, IGenerateTokenOperation
+    public class GenerateTokenOperation : OperationBase<LoginDto>, IGenerateTokenOperation
     {
-        private readonly IConfiguration _configuration;
+        private readonly IAccountService _accountService;
 
-        public GenerateTokenOperation(SensorContext context, 
-                                      IConfiguration configuration, 
-                                      IHttpContextAccessor httpContextAccessor,
-                                      INoAuthorization<LoginDTO> noAuthorization) 
-                                      : base(context, httpContextAccessor, noAuthorization)
+        public GenerateTokenOperation(SensorContext context,
+            IAccountService accountService,
+            IHttpContextAccessor httpContextAccessor,
+            INoAuthorization<LoginDto> noAuthorization)
+            : base(context, httpContextAccessor, noAuthorization)
         {
-            _configuration = configuration;
+            _accountService = accountService;
         }
 
-        public override IActionResult OperationBody(LoginDTO login)
+        public override IActionResult OperationBody(LoginDto loginDto)
         {
-            var user = Authenticate(login);
-
-            if (user != null)
+            try
             {
-                var tokenString = BuildToken(user);
-                return new OkObjectResult(new { token = tokenString });
+                var token = _accountService.SignIn(loginDto.UserName, loginDto.Password);
+                return new OkObjectResult(token);
             }
-
-            return new UnauthorizedResult();
-        }
-
-        private User Authenticate(LoginDTO login)
-        {
-            if (!Context.Users.Any())
+            catch (AuthenticationException)
             {
-                var newUser = new User
-                {
-                    Email = "jens.stjernstrom@gmail.com",
-                    IsAdministrator = true,
-                    Password = "password",
-                    UserName = "Jens"
-                };
-                Context.Add(newUser);
-                Context.SaveChanges();
+                return new UnauthorizedResult();
             }
-            return Context.Users.SingleOrDefault(u => u.UserName.ToLower() == login.UserName.ToLower()
-                                                      && u.Password == login.Password);
-        }
-
-        private string BuildToken(User user)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var claims = new[] {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("UserId",user.Id.ToString()), 
-            };
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
-                _configuration["Jwt:Issuer"],
-                claims,
-                expires: DateTime.Now.AddYears(3),
-                signingCredentials: creds);
-
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
         }
     }
 }

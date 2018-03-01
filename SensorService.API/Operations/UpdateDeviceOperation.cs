@@ -1,38 +1,35 @@
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class UpdateDeviceOperation : OperationBase<DeviceDTO>, IUpdateDeviceOperation
+    public class UpdateDeviceOperation : OperationBase<DeviceDto>, IUpdateDeviceOperation
     {
+        private readonly IDeviceQueries _deviceQueries;
+
         public UpdateDeviceOperation(SensorContext context, 
+                                     IDeviceQueries deviceQueries,
                                      IHttpContextAccessor httpContextAccessor,
-                                     INoAuthorization<DeviceDTO> noAuthorization) 
+                                     INoAuthorization<DeviceDto> noAuthorization) 
                                      : base(context, httpContextAccessor, noAuthorization)
         {
+            _deviceQueries = deviceQueries;
         }
 
-        public override IActionResult OperationBody(DeviceDTO deviceDTO)
+        public override IActionResult OperationBody(DeviceDto deviceDto)
         {
-            var device = Context.Devices.SingleOrDefault(d => d.Id == deviceDTO.Id);
+            var device = _deviceQueries.Update(deviceDto);
 
             if (device == null)
             {
                 return new BadRequestResult();
             }
 
-            device.Name = deviceDTO.Name;
-            device.UserId = deviceDTO.UserId;
-            device.IsVisible = deviceDTO.IsVisible;
-            device.Created = deviceDTO.Created;
-
-            Context.Update(device);
-            Context.SaveChanges();
-            return new ObjectResult(device);
+            return new OkResult();
         }
     }
 }

@@ -1,40 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using SensorService.UI.DTOs;
-using SensorService.UI.Models;
-using SensorService.UI.Wrappers;
+using SensorService.Shared.Dtos;
+using SensorService.Shared.Wrappers;
 
 namespace SensorService.UI.Managers
 {
-    public class ApiManager : IApiManager
+    internal class ApiManager : ApiManagerBase, IApiManager
     {
-        private const string TokenEndpoint = "api/token";
-        private const string GetDevicesEndpoint = "api/devices";
-        private const string GetDeviceByIdEndpoint = "api/devices/{0}";
 
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly Uri _baseAddress;
+        protected const string GetDevicesEndpoint = "api/devices/";
+        protected const string GetDeviceByIdEndpoint = "api/devices/{0}";
+        protected const string UsersEndpoint = "api/users";
+        protected const string GetUserByIdEndpoint = "api/users/{0}";
+        protected const string GetDevicesByUserEndpoint = "api/Devices/user/{0}";
+
 
         public ApiManager(IConfiguration configuration,
-                          IHttpClientFactory httpClientFactory,
-                          IHttpContextAccessor httpContextAccessor)
+            IHttpClientFactory httpClientFactory,
+            ISessionManager sessionManager,
+            IHttpContextAccessor httpContextAccessor)
+            : base(configuration, httpClientFactory, sessionManager, httpContextAccessor)
         {
-            _httpClientFactory = httpClientFactory;
-            _httpContextAccessor = httpContextAccessor;
-            _baseAddress = new Uri(configuration["Api:BaseUri"]);
         }
 
         public async Task<DeviceDto> GetDeviceById(string id)
@@ -48,115 +36,33 @@ namespace SensorService.UI.Managers
             return await GetData<List<DeviceDto>>(GetDevicesEndpoint);
         }
 
-        public async Task<bool> DoLogin(LoginModel loginModel)
+        public async Task<List<UserDto>> GetUsers()
         {
-            try
-            {
-                var tokenDto = await GetToken(loginModel);
-                await SetUserToken(loginModel, tokenDto);
-                return true;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return false;
-            }
+            return await GetData<List<UserDto>>(UsersEndpoint);
         }
 
-        public async Task DoLogout()
+        public async Task<UserDto> GetUserById(int id)
         {
-            await _httpContextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var endpoint = string.Format(GetUserByIdEndpoint, id);
+            return await GetData<UserDto>(endpoint);
         }
 
-        private async Task<TResult> GetData<TResult>(string endpoint,
-                                                     bool addAuthorizationToken = true)
+        public async Task<List<DeviceDto>> GetDevicesByUser(int userId)
         {
-            using (var client = _httpClientFactory.Create(_baseAddress))
-            {
-                if (addAuthorizationToken)
-                {
-                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + SessionToken);
-                }
-
-                var httpResponse = await client.GetAsync(endpoint);
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    switch (httpResponse.StatusCode)
-                    {
-                        case HttpStatusCode.Unauthorized:
-                            throw new UnauthorizedAccessException();
-                        case HttpStatusCode.NotFound:
-                            throw new FileNotFoundException();
-                        default:
-                            var exception = new Exception($"Resource server returned an error. StatusCode : {httpResponse.StatusCode}");
-                            exception.Data.Add("StatusCode", httpResponse.StatusCode);
-                            throw exception;
-                    }
-                }
-
-                return await httpResponse.Content.ReadAsAsync<TResult>();
-            }
+            var endpoint = string.Format(GetDevicesByUserEndpoint, userId);
+            return await GetData<List<DeviceDto>>(endpoint);
         }
 
-        private async Task<TResult> PostData<TResult, TRequest>(TRequest request,
-                                                                string endpoint,
-                                                                bool addAuthorizationToken = true)
+        public async Task<UserDto> CreateUser(UserDto userDto)
         {
-            var json = JsonConvert.SerializeObject(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            using (var client = _httpClientFactory.Create(_baseAddress))
-            {
-                if (addAuthorizationToken)
-                {
-                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + SessionToken);
-                }
-
-                var httpResponse = await client.PostAsync(endpoint, content);
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    switch (httpResponse.StatusCode)
-                    {
-                        case HttpStatusCode.Unauthorized:
-                            throw new UnauthorizedAccessException();
-                        case HttpStatusCode.NotFound:
-                            throw new FileNotFoundException();
-                        default:
-                            var exception = new Exception($"Resource server returned an error. StatusCode : {httpResponse.StatusCode}");
-                            exception.Data.Add("StatusCode", httpResponse.StatusCode);
-                            throw exception;
-                    }
-                }
-
-                return await httpResponse.Content.ReadAsAsync<TResult>();
-            }
+            return await PostData<UserDto, UserDto>(userDto, UsersEndpoint);
         }
 
-        private async Task<TokenDto> GetToken(LoginModel loginModel)
+        public async Task<UserDto> UpdateUser(UserDto userDto)
         {
-            return await PostData<TokenDto, LoginModel>(loginModel, TokenEndpoint, false);
-        }
-
-        private async Task SetUserToken(LoginModel loginModel, TokenDto token)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, loginModel.UserName),
-                new Claim("Token", token.Token)
-            };
-
-            var userIdentity = new ClaimsIdentity(claims, "login");
-
-            var principal = new ClaimsPrincipal(userIdentity);
-            await _httpContextAccessor.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-        }
-
-        private string SessionToken
-        {
-            get
-            {
-                var identity = (ClaimsIdentity)_httpContextAccessor.HttpContext.User.Identity;
-                return identity.Claims.FirstOrDefault(c => c.Type == "Token")?.Value;
-            }
+            return await PutData<UserDto, UserDto>(userDto, UsersEndpoint);
         }
     }
 }
+
+

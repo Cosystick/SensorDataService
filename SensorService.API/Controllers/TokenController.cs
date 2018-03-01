@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SensorService.API.DTOs;
 using SensorService.API.Operations;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Controllers
 {
@@ -9,17 +9,23 @@ namespace SensorService.API.Controllers
     public class TokenController : Controller
     {
         private readonly IGenerateTokenOperation _generateTokenOperation;
-        private readonly IGetUsersOperation _getUsersOperation;
+        private readonly IRefreshTokenOperation _refreshTokenOperation;
 
-        public TokenController(IGenerateTokenOperation generateTokenOperation,IGetUsersOperation getUsersOperation)
+        public TokenController(IGenerateTokenOperation generateTokenOperation,
+            IRefreshTokenOperation refreshTokenOperation)
         {
             _generateTokenOperation = generateTokenOperation;
-            _getUsersOperation = getUsersOperation;
+            _refreshTokenOperation = refreshTokenOperation;
         }
+
+        [HttpGet("{token}/refresh")]
+        [AllowAnonymous]
+        public IActionResult RefreshAccessToken(RefreshTokenDto tokenDto)
+            => _refreshTokenOperation.Execute(tokenDto);
 
         [AllowAnonymous]
         [HttpPost]
-        public IActionResult GenerateToken([FromBody] LoginDTO login)
+        public IActionResult GenerateToken([FromBody] LoginDto login)
         {
             return _generateTokenOperation.Execute(login);
         }

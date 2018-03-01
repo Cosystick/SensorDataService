@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
-using SensorService.UI.DTOs;
+using SensorService.Shared.Dtos;
 using SensorService.UI.Managers;
 
 namespace SensorService.UI.Pages
@@ -17,7 +17,7 @@ namespace SensorService.UI.Pages
             _apiManager = apiManager;
         }
 
-        public void OnGet([FromQuery] string id)
+        public void OnGet(string id)
         {
             Device = _apiManager.GetDeviceById(id).Result;
         }

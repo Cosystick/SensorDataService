@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
         <link rel="stylesheet" href="~/css/simple-sidebar.css">
-        <link rel="stylesheet" href="~/css/chartist.css"/>
+        <link rel="stylesheet" href="~/css/chartist.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -21,29 +21,17 @@
     @RenderSection("Scripts", required: false)
 </head>
 <body>
-    <div id="wrapper">
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                <li class="sidebar-brand">
-                    <a asp-page="/Index">Sensor Service</a>
-                </li>
-                <li>
-                    <a asp-page="/Devices">Devices</a>
-                </li>
-                <li>
-                    <a asp-controller="Account" asp-action="Logout">Logout</a>
-                </li>
-            </ul>
-        </div>
-        <!-- /#sidebar-wrapper -->
-        <div id="page-content-wrapper">
-            <div class="container body-content">
-                @RenderBody()
-                <footer></footer>
-            </div>
+<div id="wrapper">
+    @await Component.InvokeAsync("Menu")
+    <!-- /#sidebar-wrapper -->
+    <div id="page-content-wrapper">
+        <div class="container body-content">
+            @RenderBody()
+            <footer></footer>
         </div>
     </div>
-    
+</div>
+
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>

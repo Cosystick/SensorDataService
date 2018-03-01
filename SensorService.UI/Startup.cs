@@ -1,10 +1,12 @@
+using System;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SensorService.Shared.Wrappers;
 using SensorService.UI.Managers;
-using SensorService.UI.Wrappers;
 
 namespace SensorService.UI
 {
@@ -21,7 +23,9 @@ namespace SensorService.UI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IHttpClientFactory, HttpClientFactory>();
-            services.AddTransient<IHttpClientWrapper, HttpClientWrapper>() ;
+            services.AddTransient<IHttpClientWrapper, HttpClientWrapper>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ISessionManager, SessionManager>();
             services.AddScoped<IApiManager, ApiManager>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -31,7 +35,24 @@ namespace SensorService.UI
                     options.LogoutPath = "/Logout";
                 });
 
-            services.AddMvc();
+            services.AddMvc()
+                .AddRazorPagesOptions(options =>
+                    {
+                        options.Conventions
+                            .AuthorizeFolder("/")
+                            .AllowAnonymousToPage("/Login")
+                            .AllowAnonymousToPage("/Logout");
+                    }
+                );
+
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.FromMinutes(20);
+                options.Cookie.HttpOnly = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +72,7 @@ namespace SensorService.UI
 
             app.UseStaticFiles();
 
+            app.UseSession();
             app.UseMvc();
         }
     }

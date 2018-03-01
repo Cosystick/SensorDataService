@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SensorService.API.DTOs;
 using SensorService.API.Operations;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Controllers
 {
@@ -36,12 +36,12 @@ namespace SensorService.API.Controllers
         public IActionResult GetById(string id) => _getDeviceByIdOperation.Execute(id);
 
         [HttpGet("user/{id}"), Authorize]
-        public IActionResult GetByUser(int id) => _getDevicesByUserOperation.Execute(new UserIdDTO(id));
+        public IActionResult GetByUser(int id) => _getDevicesByUserOperation.Execute(new UserIdDto(id));
 
         [HttpPost, Authorize]
-        public IActionResult SendSensorData([FromBody] DeviceDataDTO deviceDataDTO) => _sendSensorDataOperation.Execute(deviceDataDTO);
+        public IActionResult SendSensorData([FromBody] UpdateDeviceDataDto updateDeviceDataDto) => _sendSensorDataOperation.Execute(updateDeviceDataDto);
 
         [HttpPut, Authorize]
-        public IActionResult Update([FromBody] DeviceDTO deviceDTO) => _updateDeviceOperation.Execute(deviceDTO);
+        public IActionResult Update([FromBody] DeviceDto deviceDto) => _updateDeviceOperation.Execute(deviceDto);
     }
 }

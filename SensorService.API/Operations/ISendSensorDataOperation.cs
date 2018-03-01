@@ -1,8 +1,8 @@
-using SensorService.API.DTOs;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public interface ISendSensorDataOperation : IOperation<DeviceDataDTO>
+    public interface ISendSensorDataOperation : IOperation<UpdateDeviceDataDto>
     {
 
     }

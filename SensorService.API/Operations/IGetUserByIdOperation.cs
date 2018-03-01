@@ -1,8 +1,8 @@
-﻿using SensorService.API.DTOs;
+﻿using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public interface IGetUserByIdOperation : IOperation<UserIdDTO>
+    public interface IGetUserByIdOperation : IOperation<UserIdDto>
     {
     }
 }

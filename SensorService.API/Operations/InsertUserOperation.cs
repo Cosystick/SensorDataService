@@ -1,41 +1,35 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class InsertUserOperation : OperationBase<UserDTO>, IInsertUserOperation
+    public class InsertUserOperation : OperationBase<UserDto>, IInsertUserOperation
     {
+        private readonly IUserQueries _userQueries;
+
         public InsertUserOperation(SensorContext context,
                                    IHttpContextAccessor httpContextAccessor,
-                                   IAdministratorAuthorization<UserDTO> administratorAuthorization)
+                                   IUserQueries userQueries,
+                                   IAdministratorAuthorization<UserDto> administratorAuthorization)
             : base(context, httpContextAccessor, administratorAuthorization)
         {
+            _userQueries = userQueries;
         }
 
-        public override IActionResult OperationBody(UserDTO userDTO)
+        public override IActionResult OperationBody(UserDto UserDto)
         {
-            var existingUser =
-                Context.Users.SingleOrDefault(u => u.UserName == userDTO.UserName || u.Email == userDTO.Email);
-            if (existingUser != null)
+            var user = _userQueries.Insert(UserDto);
+
+            if (user == null)
             {
-                return new BadRequestObjectResult("User already exists");
+                return new BadRequestObjectResult("Could not insert user, the username might already exist");
             }
 
-            var newUser = new User
-            {
-                UserName = userDTO.UserName,
-                Email = userDTO.Email,
-                Password = userDTO.Password,
-                IsAdministrator = userDTO.IsAdministrator
-            };
-
-            Context.Users.Add(newUser);
-            Context.SaveChanges();
-            return new OkObjectResult(newUser);
+            return new OkObjectResult(user);
         }
     }
 }

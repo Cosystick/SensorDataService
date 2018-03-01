@@ -1,5 +1,4 @@
 ﻿@page
-@using SensorService.UI.Pages
 @model SensorService.UI.Pages.IndexModel
 @{
     ViewData["Title"] = "Home page";
@@ -7,4 +6,8 @@
 
 <div >
     Welcome @Model.UserName!
+    @if (Model.IsAdministrator)
+                            {
+    <div>You mighty, you..</div>
+                            }
 </div>

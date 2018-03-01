@@ -19,8 +19,11 @@
                 <label asp-for="Password" class="control-label">Password:</label><input asp-for="Password" class="form-control" type="password"/>
             </div>
         </div>
+        <div class="row"></div>
         <div class="row">
-            <div class="col-sm-6"><input type="submit" class="btn-default form-control" value="Login"/></div>
+            <div class="col-sm-2 col-sm-offset-4" style="padding-top:10px">
+                <input type="submit" class="btn-default form-control" value="Login"/>
+            </div>
         </div>
     </form>
     @if (!string.IsNullOrEmpty(Model.Error))

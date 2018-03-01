@@ -1,33 +1,28 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class DeleteUserOperation : OperationBase<UserIdDTO>, IDeleteUserOperation
+    public class DeleteUserOperation : OperationBase<UserIdDto>, IDeleteUserOperation
     {
+        private readonly IUserQueries _userQueries;
+
         public DeleteUserOperation(SensorContext context,
+                                   IUserQueries userQueries,
                                    IHttpContextAccessor httpContextAccessor,
-                                   IAdministratorAuthorization<UserIdDTO> authorization)
+                                   IAdministratorAuthorization<UserIdDto> authorization)
             : base(context, httpContextAccessor, authorization)
         {
+            _userQueries = userQueries;
         }
 
-        public override IActionResult OperationBody(UserIdDTO userIdDTO)
+        public override IActionResult OperationBody(UserIdDto userIdDto)
         {
-            var existingUser = Context.Users.SingleOrDefault(u => u.Id == userIdDTO.Id);
-            if (existingUser == null)
-            {
-                return new NotFoundResult();
-            }
-
-            var userDevices = Context.Devices.Where(d => d.UserId == userIdDTO.Id).ToList();
-            Context.RemoveRange(userDevices);
-            Context.Remove(existingUser);
-            Context.SaveChanges();
+            _userQueries.Delete(userIdDto.Id);
             return new OkResult();
         }
     }

@@ -1,39 +1,38 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class UpdateUserOperation : OperationBase<UserDTO>, IUpdateUserOperation
+    public class UpdateUserOperation : OperationBase<UserDto>, IUpdateUserOperation
     {
+        private readonly IUserQueries _userQueries;
+
         public UpdateUserOperation(SensorContext context, 
+                                   IUserQueries userQueries,
                                    IHttpContextAccessor httpContextAccessor, 
-                                   INoAuthorization<UserDTO> authorization) 
+                                   INoAuthorization<UserDto> authorization) 
             : base(context, httpContextAccessor, authorization)
         {
+            _userQueries = userQueries;
         }
 
-        public override IActionResult OperationBody(UserDTO userDTO)
+        public override IActionResult OperationBody(UserDto userDto)
         {
-            var existingUser = Context.Users.SingleOrDefault(u => u.Id == userDTO.Id);
-            if (existingUser == null)
-            {
-                return new BadRequestResult();
-            }
-
-            if (existingUser.Id != CurrentUserId && !CurrentUser.IsAdministrator)
+            if (userDto.Id != CurrentUserId && !CurrentUser.IsAdministrator)
             {
                 return new UnauthorizedResult();
             }
 
-            existingUser.Email = userDTO.Email;
-            existingUser.Password = userDTO.Password;
-            existingUser.IsAdministrator = userDTO.IsAdministrator;
-            Context.Update(existingUser);
-            Context.SaveChanges();
+            var existingUser = _userQueries.Update(userDto);
+            if (existingUser == null)
+            {
+                return new BadRequestResult();
+            }
+            
             return new OkResult();
         }
     }

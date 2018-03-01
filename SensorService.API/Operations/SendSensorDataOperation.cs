@@ -1,65 +1,36 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class SendSensorDataOperation : OperationBase<DeviceDataDTO>, ISendSensorDataOperation
+    public class SendSensorDataOperation : OperationBase<UpdateDeviceDataDto>, ISendSensorDataOperation
     {
+        private readonly IDeviceQueries _deviceQueries;
+
         public SendSensorDataOperation(SensorContext context, 
+                                       IDeviceQueries deviceQueries,
                                        IHttpContextAccessor httpContextAccessor,
-                                       INoAuthorization<DeviceDataDTO> noAuthorization) 
+                                       INoAuthorization<UpdateDeviceDataDto> noAuthorization) 
                                        : base(context, httpContextAccessor, noAuthorization)
         {
+            _deviceQueries = deviceQueries;
         }
 
-        public override IActionResult OperationBody(DeviceDataDTO deviceDataDTO)
+        public override IActionResult OperationBody(UpdateDeviceDataDto updateDeviceDataDto)
         {
-            if (deviceDataDTO?.SensorData == null || !deviceDataDTO.SensorData.Any())
+            if (updateDeviceDataDto?.SensorData == null || !updateDeviceDataDto.SensorData.Any())
             {
                 return new BadRequestResult();
             }
-            var existingDevice = Context.Devices.Include(d => d.Sensors)
-                                                 .SingleOrDefault(d => d.Id == deviceDataDTO.DeviceId);
-            if (existingDevice == null)
-            {
-                var createdDevice = new Device { Id = deviceDataDTO.DeviceId,UserId = CurrentUserId};
-                foreach (var sensor in deviceDataDTO.SensorData)
-                {
-                    var createdSensor = new Sensor { SensorKey = sensor.SensorKey, SensorType = sensor.SensorType };
-                    var data = new SensorData(sensor.Value);
-                    createdSensor.Data.Add(data);
-                    createdDevice.Sensors.Add(createdSensor);
-                }
-                Context.Add(createdDevice);
-                Context.SaveChanges();
-                return new ObjectResult(createdDevice);
-            }
-            else
-            {
-                foreach (var sensor in deviceDataDTO.SensorData)
-                {
-                    var dataToAdd = new SensorData(sensor.Value);
-                    if (existingDevice.Sensors.All(s => s.SensorKey != sensor.SensorKey))
-                    {
-                        var sensorToAdd = new Sensor { SensorKey = sensor.SensorKey,
-                                                       SensorType = sensor.SensorType };
-                        sensorToAdd.Data.Add(dataToAdd);
-                        existingDevice.Sensors.Add(sensorToAdd);
-                    }
-                    else
-                    {
-                        existingDevice.Sensors.SingleOrDefault(s => s.SensorKey == sensor.SensorKey)?.Data.Add(dataToAdd);
-                    }
-                }
-                Context.Update(existingDevice);
-                Context.SaveChanges();
-                return new ObjectResult(existingDevice);
-            }
+
+            var device = _deviceQueries.UpdateDeviceData(CurrentUserId, updateDeviceDataDto);
+
+            return new OkObjectResult(device);
         }
     }
 }

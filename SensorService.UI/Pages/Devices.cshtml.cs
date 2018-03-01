@@ -1,11 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.CodeAnalysis.CSharp;
-using SensorService.UI.DTOs;
+using SensorService.Shared.Dtos;
 using SensorService.UI.Managers;
 
 namespace SensorService.UI.Pages

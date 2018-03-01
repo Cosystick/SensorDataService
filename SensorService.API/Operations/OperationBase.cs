@@ -1,4 +1,5 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +45,10 @@ namespace SensorService.API.Operations
 
         private void SetCurrentUser()
         {
-            var userString = _httpContextAccessor.HttpContext.User.FindFirstValue("UserId");
+            var userString = _httpContextAccessor
+                .HttpContext
+                .User
+                .FindFirstValue("UserId");
             if (!string.IsNullOrEmpty(userString))
             {
                 CurrentUserId = int.Parse(userString);

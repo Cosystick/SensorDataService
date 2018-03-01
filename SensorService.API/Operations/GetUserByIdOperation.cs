@@ -1,26 +1,34 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SensorService.API.Authorizations;
-using SensorService.API.DTOs;
+using SensorService.API.Extensions;
 using SensorService.API.Models;
+using SensorService.API.Queries;
+using SensorService.Shared.Dtos;
 
 namespace SensorService.API.Operations
 {
-    public class GetUserByIdOperation : OperationBase<UserIdDTO>, IGetUserByIdOperation
+    public class GetUserByIdOperation : OperationBase<UserIdDto>, IGetUserByIdOperation
     {
-        public GetUserByIdOperation(SensorContext context, IHttpContextAccessor httpContextAccessor, INoAuthorization<UserIdDTO> authorization) : base(context, httpContextAccessor, authorization)
+        private readonly IUserQueries _userQueries;
+
+        public GetUserByIdOperation(SensorContext context, 
+            IHttpContextAccessor httpContextAccessor, 
+            IUserQueries userQueries,
+            INoAuthorization<UserIdDto> authorization) 
+            : base(context, httpContextAccessor, authorization)
         {
+            _userQueries = userQueries;
         }
 
-        public override IActionResult OperationBody(UserIdDTO userIdDTO)
+        public override IActionResult OperationBody(UserIdDto UserIdDto)
         {
-            var existingUser = Context.Users.SingleOrDefault(u => u.Id == userIdDTO.Id);
+            var existingUser = _userQueries.GetById(UserIdDto.Id);
             if (existingUser == null)
             {
                 return new NotFoundResult();
             }
-            return new OkObjectResult(existingUser);
+            return new OkObjectResult<UserDto,User>(existingUser);
         }
     }
 }

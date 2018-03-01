@@ -1,0 +1,26 @@
+﻿@model SensorService.UI.Models.MenuModel
+<div id="sidebar-wrapper">
+    <ul class="sidebar-nav">
+        @if (Model.IsAuthenticated)
+        {
+            <li class="sidebar-brand">
+                <a href="@Url.Page("/Index")">Sensor Service</a>
+            </li>
+            <li>
+                <a href="@Url.Page("/Devices")">Devices</a>
+            </li>
+        }
+        @if (Model.IsAuthenticated && Model.User.IsAdministrator)
+         {
+             <li>
+                 <a href="@Url.Page("/Users")">Users</a>
+             </li>
+         }
+        @if (Model.IsAuthenticated)
+        {
+            <li>
+                <a href="@Url.Page("/Logout")">Logout</a>
+            </li>
+        }
+    </ul>
+</div>

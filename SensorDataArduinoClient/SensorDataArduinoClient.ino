@@ -9,28 +9,51 @@
 
 String configFileName = "/config.json";
 
-char owner[40];
+char username[40];
+char token[];
+char refreshToken[];
+char password[40];
 char serviceAddress[40];
 char servicePort[6];
 long deviceId;
 String server;
 String port;
 
-WiFiManagerParameter customOwner("owner", "Owner key", owner, 40);
+// Pins
+int analogPin = A0;
+int powerPin = D1;
+
+WiFiManagerParameter customUserName("username", "Username", username, 40);
+WiFiManagerParameter customPassword("password", "Password", password, 40);
 WiFiManagerParameter customServiceAddress("server", "Server address", serviceAddress, 40);
 WiFiManagerParameter customServicePort("port", "Server port", servicePort, 6);
 
 bool shouldSaveConfig = false;
 
+void writeToken(char inToken[400],char inRefreshToken[100]) {
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& json = jsonBuffer.createObject();
+  json["token"] = inToken;
+  json["refreshToken"] = inRefreshToken;
+
+  SPIFFS.begin();
+  File configFile = SPIFFS.open(configFileName, "w");
+  if (!configFile) {
+    Serial.println("failed to open config file for writing");
+  } else {
+    json.printTo(Serial);
+    json.printTo(configFile);
+  }
+  configFile.close();
+}
+
 void writeSettings() {
-  strcpy(owner, customOwner.getValue());
   strcpy(serviceAddress, customServiceAddress.getValue());
   strcpy(servicePort, customServicePort.getValue());
 
   Serial.println("saving config..");
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.createObject();
-  json["owner"] = owner;
   json["server"] = serviceAddress;
   json["port"] = servicePort;
 
@@ -49,6 +72,7 @@ void writeSettings() {
 void runWiFiManager() {
   WiFiManager wifiManager;
   wifiManager.setSaveConfigCallback(onSaveConfig);
+  wifiManager.hasConnected
 
   wifiManager.addParameter(&customOwner);
   wifiManager.addParameter(&customServiceAddress);
@@ -58,7 +82,7 @@ void runWiFiManager() {
   //wifiManager.resetSettings();
 
   if (!wifiManager.autoConnect("SensorDataClient", "connectM3")) {
-    delay(3000);
+    delay(1000);
     ESP.reset();
     delay(5000);
   }
@@ -89,11 +113,27 @@ String getConfigValue(String name) {
   return value;
 }
 
+int getSensorValue(){
+  digitalWrite(powerPin, HIGH); // Enable sensor before read
+  delay(50);
+  
+  int sensorValue = analogRead(analogPin);
+  sensorValue = abs(1024 - sensorValue1);
+  
+  digitalWrite(powerPin,LOW); // Disable sensor after read
+  return sensorValue;
+}
+
 
 
 void setup() {
   Serial.begin(115200);
   delay(500);
+
+  pinMode(analogPin, INPUT);
+  pinMode(powerPin, OUTPUT);
+
+  digitalWrite(powerPin,LOW); // Start by disabling the sensor
 
   deviceId = ESP.getChipId();
 
